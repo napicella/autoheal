@@ -1,0 +1,71 @@
+services:
+  should-keep-restarting:
+    image: alpine
+    network_mode: none
+    restart: "no"
+    labels:
+      - "${AUTOHEAL_CONTAINER_LABEL:-autoheal}=true"
+    healthcheck:
+      test: exit 1
+      interval: 3s
+      timeout: 1s
+      retries: 1
+      start_period: 5s
+    volumes:
+      - ${TESTDATA_DIR}/should-keep-restarting:/state
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo started at $(date) >> /state/start.log
+      exec tail -f /dev/null
+      "
+
+  shouldnt-restart-healthy:
+    image: alpine
+    network_mode: none
+    restart: "no"
+    labels:
+      - "${AUTOHEAL_CONTAINER_LABEL:-autoheal}=true"
+    healthcheck:
+      test: exit 0
+      interval: 2s
+      timeout: 1s
+      retries: 1
+      start_period: 1s
+    volumes:
+      - ${TESTDATA_DIR}/shouldnt-restart-healthy:/state
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo started at $(date) >> /state/start.log
+      exec tail -f /dev/null
+      "
+
+  shouldnt-restart-no-label:
+    image: alpine
+    network_mode: none
+    restart: "no"
+    healthcheck:
+      test: exit 1
+      interval: 3s
+      timeout: 1s
+      retries: 1
+      start_period: 5s
+    volumes:
+      - ${TESTDATA_DIR}/shouldnt-restart-no-label:/state
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo started at $(date) >> /state/start.log
+      exec tail -f /dev/null
+      "
+
+  autoheal:
+    build:
+      context: ../../
+    command: ["/usr/local/bin/autoheal", "-project", "teststack"]
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: "${AUTOHEAL_CONTAINER_LABEL:-autoheal}"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"

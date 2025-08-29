@@ -1,0 +1,5 @@
+# Autoheal
+
+WIP tool that monitors and restarts unhealthy docker containers.  
+Inspired by [willfarrell/docker-autoheal](https://github.com/willfarrell/docker-autoheal) but rewritten in golang.
+Containers need to be labeled with "autoheal : true".
