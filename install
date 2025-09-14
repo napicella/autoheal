@@ -16,7 +16,7 @@ IMAGE_NAME="${1:-autoheal:latest}"
 GO_VERSION="${2:-1.25}"
 REPO_URL="https://github.com/napicella/autoheal.git"
 REPO_DIR="./autoheal"
-DOCKERFILE_PATH="$REPO_DIR/Dockerfile"
+DOCKERFILE_PATH="Dockerfile"
 
 if [ ! -d "$REPO_DIR" ]; then
     echo "📥 Cloning Autoheal repository..."
