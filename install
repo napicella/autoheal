@@ -43,11 +43,11 @@ echo
 echo "📦 Building Docker image '$IMAGE_NAME' with Go $GO_VERSION..."
 echo "--------------------------------------------"
 
-# Step 2: Build the Docker image
 docker build \
     --build-arg GOVERSION="$GO_VERSION" \
     -t "$IMAGE_NAME" \
-    -f "$DOCKERFILE_PATH" .
+    -f "$DOCKERFILE_PATH" \
+    "$REPO_DIR"
 
 echo
 echo "✅ Docker image '$IMAGE_NAME' built successfully!"
