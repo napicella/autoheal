@@ -24,6 +24,7 @@ type Config struct {
 func main() {
 	cfg := loadConfig()
 	initLogger(cfg.Verbose)
+	log.Debug().Msgf("Using config: %+v", cfg)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -33,6 +34,7 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create docker client")
 	}
 
+	log.Info().Msg("Monitoring unhealthy containers labelled 'autoheal'")
 	w := NewWatcher(cli, cfg)
 	w.Run(ctx)
 }
@@ -50,9 +52,13 @@ func loadConfig() Config {
 
 func initLogger(verbose bool) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	printBanner()
+
+	logLevel := zerolog.InfoLevel
 	if verbose {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		logLevel = zerolog.DebugLevel
 	}
+
+	zerolog.SetGlobalLevel(logLevel)
+	log.Debug().Msgf("Logger set to %s level", logLevel.String())
 }

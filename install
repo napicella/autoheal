@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# --------------------------------------------------------------------
+# This script builds a Docker container using the provided multi-stage
+# Dockerfile for a Go project.
+#
+# Usage:
+#   ./install [image_name:tag] [go_version]
+#   Defaults:
+#       image_name: autoheal:latest
+#       go_version: 1.25
+# --------------------------------------------------------------------
+set -euo pipefail
+
+# Defaults
+IMAGE_NAME="${1:-autoheal:latest}"
+GO_VERSION="${2:-1.25}"
+DOCKERFILE_PATH="./Dockerfile"
+
+echo "============================================"
+echo "⚙️  Autoheal Docker Install"
+echo "--------------------------------------------"
+echo "This will build the Docker image for autoheal."
+echo "Image name: $IMAGE_NAME"
+echo "Go version:  $GO_VERSION"
+echo
+read -p "Proceed with building the image? [y/N]: " CONFIRM
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    echo "❌ Installation aborted."
+    exit 1
+fi
+
+echo
+echo "📦 Building Docker image '$IMAGE_NAME' with Go $GO_VERSION..."
+echo "--------------------------------------------"
+
+# Build the Docker image
+docker build \
+    --build-arg GOVERSION="$GO_VERSION" \
+    -t "$IMAGE_NAME" \
+    -f "$DOCKERFILE_PATH" .
+
+echo "✅ Docker image '$IMAGE_NAME' built successfully!"
+echo "You can now run autoheal with:"
+echo "docker run -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME" -project myproject -verbose
+echo
+echo "📖 For more information, please check the README:"
+echo "https://github.com/napicella/autoheal"
+echo "============================================"
