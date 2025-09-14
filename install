@@ -56,5 +56,5 @@ echo "You can now run autoheal with:"
 echo "docker run -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME -project myproject -verbose"
 echo
 echo "📖 For more information, please check the README:"
-echo "https://github.com/napicella/autoheal"
+echo "REPO_URL"
 echo "============================================"
