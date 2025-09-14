@@ -23,7 +23,7 @@ echo "This will build the Docker image for autoheal."
 echo "Image name: $IMAGE_NAME"
 echo "Go version:  $GO_VERSION"
 echo
-read -p "Proceed with building the image? [y/N]: " CONFIRM
+read -p "Proceed with building the image? [y/N]: " CONFIRM < /dev/tty
 if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     echo "❌ Installation aborted."
     exit 1

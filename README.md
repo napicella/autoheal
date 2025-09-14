@@ -27,7 +27,7 @@ project passed as parameter.
 
 ## Install
 ```
-wget -qO- https://github.com/napicella/autoheal/install | bash
+wget -qO- https://github.com/napicella/autoheal/raw/refs/heads/main/install | bash
 ```
 
 Or run the `install` script, which by defaults builds a docker image called `autoheal:latest`.
