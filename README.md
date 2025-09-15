@@ -63,7 +63,5 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      COMPOSE_PROJECT_NAME: myproject
     command: ["-project", "my-docker-compose-project", "-verbose"]
 ```
