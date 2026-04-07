@@ -34,7 +34,7 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create docker client")
 	}
 
-	log.Info().Msg("Monitoring unhealthy containers labelled 'autoheal'")
+	log.Info().Msgf("Monitoring unhealthy containers labelled 'autoheal' from projects %s", cfg.ComposeProjects)
 	w := NewWatcher(cli, cfg)
 	w.Run(ctx)
 }
@@ -65,5 +65,4 @@ func initLogger(verbose bool) {
 	}
 
 	zerolog.SetGlobalLevel(logLevel)
-	log.Debug().Msgf("Logger set to %s level", logLevel.String())
 }

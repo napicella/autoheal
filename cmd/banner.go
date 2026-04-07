@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func printBanner() {
 	banner := `
@@ -23,5 +26,5 @@ func printBanner() {
 Restart unhealthy containers
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 `
-	fmt.Println(banner)
+	fmt.Fprintln(os.Stderr, banner)
 }
