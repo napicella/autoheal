@@ -22,7 +22,7 @@ func TestAutohealE2E(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Join(testdataDir, "should-keep-restarting"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(testdataDir, "shouldnt-restart-healthy"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(testdataDir, "shouldnt-restart-no-label"), 0755))
-
+	
 	// Start environment
 	up := exec.Command("docker", "compose", "-p", "teststack", "-f", composeFile, "up", "-d", "--build")
 	up.Env = append(os.Environ(), fmt.Sprintf("TESTDATA_DIR=%s", testdataDir))

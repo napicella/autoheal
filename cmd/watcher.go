@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/moby/moby/api/types/container"
@@ -9,6 +10,14 @@ import (
 	"github.com/moby/moby/api/types/filters"
 	"github.com/moby/moby/client"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	labelProjName        = "com.docker.compose.project"
+	labelComposeFilepath = "com.docker.compose.project.config_files"
+
+	labelAutoheal         = "autoheal"
+	labelAutohealStrategy = "autoheal.strategy"
 )
 
 type Watcher struct {
@@ -59,11 +68,9 @@ func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 	attrs := msg.Actor.Attributes
 	ID := msg.Actor.ID
 
-	isAutoheal := attrs["autoheal"] == "true"
-	matchComposeProject := true
-	if t.cfg.ComposeProject != "" {
-		matchComposeProject = attrs["com.docker.compose.project"] == t.cfg.ComposeProject
-	}
+	isAutoheal := attrs[labelAutoheal] == "true"
+	projName := attrs[labelProjName]
+	matchComposeProject := slices.Contains(t.cfg.ComposeProjects, projName)
 	shouldRestart := isAutoheal && matchComposeProject
 	if !shouldRestart {
 		return
@@ -77,6 +84,32 @@ func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 		timeout := t.cfg.StopTimeout
 		if err := t.cli.ContainerStop(ctx, ID, container.StopOptions{Timeout: &timeout}); err != nil {
 			log.Error().Err(err).Str("container", name).Msg("failed to stop container")
+		}
+		return
+	}
+
+	restartComposeProj := attrs[labelAutohealStrategy] == "project"
+	if restartComposeProj {
+		log.Info().
+			Str("container", name).
+			Str("id", ID[:12]).
+			Str("project", projName).
+			Msg("restarting compose project container")
+
+		composeFilepath := attrs[labelComposeFilepath]
+		if composeFilepath == "" {
+			log.Error().Msgf(
+				"unable to determine compose file path for container, label %s not found",
+				labelComposeFilepath)
+			return
+		}
+		log.Info().Msgf("restarting compose project %s", projName)
+		err := restartCompose(ctx, composeProject{
+			filepath: composeFilepath,
+			name:     name,
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("failed to restart compose project")
 		}
 		return
 	}

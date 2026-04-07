@@ -60,10 +60,12 @@ services:
       exec tail -f /dev/null
       "
 
-  autoheal:
+  autoheal-test:
+    container_name: autoheal-test
+    network_mode: none
     build:
       context: ../../
-    command: ["/usr/local/bin/autoheal", "-project", "teststack"]
+    command: ["-verbose", "-project", "teststack"]
     restart: unless-stopped
     environment:
       AUTOHEAL_CONTAINER_LABEL: "${AUTOHEAL_CONTAINER_LABEL:-autoheal}"

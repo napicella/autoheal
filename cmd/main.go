@@ -14,17 +14,17 @@ import (
 )
 
 type Config struct {
-	ComposeProject string
-	Verbose        bool
-	RestartLimit   int
-	StopTimeout    int
-	CheckInterval  time.Duration
+	ComposeProjects projectsFlag
+	Verbose         bool
+	RestartLimit    int
+	StopTimeout     int
+	CheckInterval   time.Duration
 }
 
 func main() {
 	cfg := loadConfig()
 	initLogger(cfg.Verbose)
-	log.Debug().Msgf("Using config: %+v", cfg)
+	log.Info().Msgf("Using config: %+v", cfg)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -41,11 +41,16 @@ func main() {
 
 func loadConfig() Config {
 	var cfg Config
-	flag.StringVar(&cfg.ComposeProject, "project", "", "Only monitor containers belonging to this Docker Compose project")
-	flag.BoolVar(&cfg.Verbose, "verbose", false, "Enable verbose logging")
-	flag.IntVar(&cfg.RestartLimit, "restart-limit", 10, "Maximum number of restarts before stopping container")
-	flag.IntVar(&cfg.StopTimeout, "stop-timeout", 10, "Stop timeout (seconds)")
-	flag.DurationVar(&cfg.CheckInterval, "interval", 5*time.Second, "Interval between health checks")
+	flag.Var(&cfg.ComposeProjects, "project",
+		"Comma-separated list of Docker Compose project to monitor. Only monitor containers belonging to the projects listed")
+	flag.BoolVar(&cfg.Verbose, "verbose", false,
+		"Enable verbose logging")
+	flag.IntVar(&cfg.RestartLimit, "restart-limit", 10,
+		"Maximum number of restarts before stopping container")
+	flag.IntVar(&cfg.StopTimeout, "stop-timeout", 10,
+		"Stop timeout (seconds)")
+	flag.DurationVar(&cfg.CheckInterval, "interval", 5*time.Second,
+		"Interval between health checks")
 	flag.Parse()
 	return cfg
 }

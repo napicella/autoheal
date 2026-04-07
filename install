@@ -14,17 +14,7 @@ set -euo pipefail
 # Defaults
 IMAGE_NAME="${1:-autoheal:latest}"
 GO_VERSION="${2:-1.25}"
-REPO_URL="https://github.com/napicella/autoheal.git"
-REPO_DIR="./autoheal"
 DOCKERFILE_PATH="Dockerfile"
-
-if [ ! -d "$REPO_DIR" ]; then
-    echo "📥 Cloning Autoheal repository..."
-    git clone "$REPO_URL" "$REPO_DIR"
-else
-    echo "📂 Repository already exists at $REPO_DIR, pulling latest changes..."
-    git -C "$REPO_DIR" pull
-fi
 
 echo "============================================"
 echo "⚙️  Autoheal Docker Install"
@@ -43,7 +33,6 @@ echo
 echo "📦 Building Docker image '$IMAGE_NAME' with Go $GO_VERSION..."
 echo "--------------------------------------------"
 
-cd $REPO_DIR
 docker build \
     --build-arg GOVERSION="$GO_VERSION" \
     -t "$IMAGE_NAME" \
@@ -55,6 +44,5 @@ echo "✅ Docker image '$IMAGE_NAME' built successfully!"
 echo "You can now run autoheal with:"
 echo "docker run -v /var/run/docker.sock:/var/run/docker.sock $IMAGE_NAME -project myproject -verbose"
 echo
-echo "📖 For more information, please check the README:"
-echo "REPO_URL"
+echo "📖 For more information, please check the README."
 echo "============================================"
