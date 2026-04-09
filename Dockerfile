@@ -10,7 +10,7 @@ COPY ./cmd .
 RUN CGO_ENABLED=0 go build -o /autoheal .
 
 # Runtime stage
-FROM gcr.io/distroless/base-debian12:latest
+FROM docker:cli
 
 COPY --from=builder /autoheal /usr/local/bin/autoheal
 USER root
