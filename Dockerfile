@@ -1,7 +1,7 @@
 # Build stage
 ARG GOVERSION=1.25
-ENV GOPROXY=direct
 FROM golang:${GOVERSION} AS builder
+ENV GOPROXY=direct
 
 WORKDIR /src
 COPY go.mod go.sum ./
