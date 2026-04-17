@@ -1,5 +1,6 @@
 # Build stage
 ARG GOVERSION=1.25
+ENV GOPROXY=direct
 FROM golang:${GOVERSION} AS builder
 
 WORKDIR /src
