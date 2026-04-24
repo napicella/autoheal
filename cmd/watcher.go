@@ -90,12 +90,6 @@ func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 
 	restartComposeProj := attrs[labelAutohealStrategy] == "project"
 	if restartComposeProj {
-		log.Info().
-			Str("container", name).
-			Str("id", ID[:12]).
-			Str("project", projName).
-			Msg("restarting compose project container")
-
 		composeFilepath := attrs[labelComposeFilepath]
 		if composeFilepath == "" {
 			log.Error().Msgf(
@@ -103,10 +97,17 @@ func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 				labelComposeFilepath)
 			return
 		}
-		log.Info().Msgf("restarting compose project %s", projName)
+
+		log.Info().
+			Str("ctnName", name).
+			Str("ctnID", ID[:12]).
+			Str("projectName", projName).
+			Str("projectFile", composeFilepath).
+			Msg("restarting compose project container")
+
 		err := restartCompose(ctx, composeProject{
 			filepath: composeFilepath,
-			name:     name,
+			name:     projName,
 		})
 		if err != nil {
 			log.Error().Err(err).Msg("failed to restart compose project")
