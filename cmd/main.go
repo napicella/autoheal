@@ -24,7 +24,7 @@ type Config struct {
 func main() {
 	cfg := loadConfig()
 	initLogger(cfg.Verbose)
-	log.Info().Msgf("Using config: %+v", cfg)
+	log.Info().Msgf("Autoheal config: %+v", cfg)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

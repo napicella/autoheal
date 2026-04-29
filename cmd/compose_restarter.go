@@ -25,7 +25,7 @@ func restartCompose(ctx context.Context, proj composeProject) error {
 	if err := downCmd.Run(); err != nil {
 		return fmt.Errorf("failed to run docker compose down: %w", err)
 	}
-	upCmd := exec.CommandContext(ctx, "docker", "compose", "-f", proj.filepath, "-p", proj.name, "up", "-d")
+	upCmd := exec.CommandContext(ctx, "docker", "compose", "-f", proj.filepath, "-p", proj.name, "up", "--remove-orphans", "-d")
 	upCmd.Stdout = os.Stdout
 	upCmd.Stderr = os.Stderr
 	return upCmd.Run()
