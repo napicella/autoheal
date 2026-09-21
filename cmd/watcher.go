@@ -21,16 +21,21 @@ const (
 )
 
 type Watcher struct {
-	cli              *client.Client
-	cfg              Config
-	numberOfRestarts map[string]int
+	cli     *client.Client
+	cfg     Config
+	metrics map[string]*RestartMetrics
+}
+
+type RestartMetrics struct {
+	lastRestart time.Time
+	numRestarts int
 }
 
 func NewWatcher(cli *client.Client, cfg Config) *Watcher {
 	return &Watcher{
-		numberOfRestarts: make(map[string]int),
-		cfg:              cfg,
-		cli:              cli,
+		metrics: make(map[string]*RestartMetrics),
+		cfg:     cfg,
+		cli:     cli,
 	}
 }
 
@@ -67,19 +72,32 @@ func (t *Watcher) Run(ctx context.Context) {
 func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 	attrs := msg.Actor.Attributes
 	ID := msg.Actor.ID
-
+	name := attrs["name"]
 	isAutoheal := attrs[labelAutoheal] == "true"
 	projName := attrs[labelProjName]
 	matchComposeProject := slices.Contains(t.cfg.ComposeProjects, projName)
 	shouldRestart := isAutoheal && matchComposeProject
+
 	if !shouldRestart {
 		return
 	}
-	name := attrs["name"]
-	t.numberOfRestarts[name]++
-	restarts := t.numberOfRestarts[name]
 
-	if restarts >= t.cfg.RestartLimit {
+	now := time.Now()
+	restartMetrics, exists := t.metrics[name]
+	if !exists || restartMetrics.lastRestart.Before(now.Add(-time.Hour)) {
+		log.Info().Str("container", name).
+			Str("id", ID[:12]).
+			Msg("reset the num of restarts after one hour gone by without a restart")
+
+		restartMetrics = &RestartMetrics{
+			lastRestart: now,
+		}
+		t.metrics[name] = restartMetrics
+	}
+	restartMetrics.numRestarts++
+	log.Info().Str("container", name).Msgf("restart num %d/%d", restartMetrics.numRestarts, t.cfg.RestartLimit)
+
+	if restartMetrics.numRestarts >= t.cfg.RestartLimit {
 		log.Warn().Str("container", name).Msg("max restarts reached, stopping container")
 		timeout := t.cfg.StopTimeout
 		if err := t.cli.ContainerStop(ctx, ID, container.StopOptions{Timeout: &timeout}); err != nil {
@@ -99,8 +117,8 @@ func (t *Watcher) restart(ctx context.Context, msg events.Message) {
 		}
 
 		log.Info().
-			Str("ctnName", name).
-			Str("ctnID", ID[:12]).
+			Str("container", name).
+			Str("id", ID[:12]).
 			Str("projectName", projName).
 			Str("projectFile", composeFilepath).
 			Msg("restarting compose project container")
